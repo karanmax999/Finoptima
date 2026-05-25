@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Global Stress Testing Simulator | FinOptima</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400;1,500;1,600;1,700&amp;family=Manrope:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Configuration -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-highest": "#e6e0d6",
+                        "surface-container": "#f2ece4",
+                        "on-error-container": "#7a1a10",
+                        "tertiary-container": "#d47070",
+                        "surface-container-lowest": "#ffffff",
+                        "on-tertiary-fixed": "#2e1515",
+                        "on-primary-fixed-variant": "#8a4518",
+                        "primary-fixed-dim": "#f0a878",
+                        "surface-dim": "#dcd6cc",
+                        "on-primary-container": "#fbe8d8",
+                        "surface-variant": "#ece6dc",
+                        "on-secondary-fixed-variant": "#504840",
+                        "primary-fixed": "#fbe8d8",
+                        "on-primary-fixed": "#401a08",
+                        "secondary-fixed-dim": "#cec6be",
+                        "on-error": "#ffffff",
+                        "inverse-on-surface": "#faf5ee",
+                        "outline": "#9a9088",
+                        "primary-container": "#e08850",
+                        "secondary": "#78706a",
+                        "background": "#faf5ee",
+                        "tertiary-fixed-dim": "#e8a0a0",
+                        "primary": "#c2652a",
+                        "on-tertiary-container": "#3a2020",
+                        "secondary-fixed": "#eae2da",
+                        "on-tertiary-fixed-variant": "#6e3030",
+                        "tertiary-fixed": "#fce0e0",
+                        "on-secondary": "#ffffff",
+                        "on-background": "#3a302a",
+                        "surface": "#faf5ee",
+                        "secondary-container": "#eae2da",
+                        "on-secondary-container": "#605850",
+                        "surface-tint": "#c2652a",
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#faf5ee",
+                        "on-secondary-fixed": "#2a2420",
+                        "inverse-primary": "#f0a878",
+                        "surface-container-high": "#ece6dc",
+                        "on-tertiary": "#ffffff",
+                        "inverse-surface": "#3a302a",
+                        "error-container": "#fce4e0",
+                        "outline-variant": "#d8d0c8",
+                        "on-surface": "#3a302a",
+                        "tertiary": "#8c3c3c",
+                        "surface-container-low": "#f6f0e8",
+                        "on-surface-variant": "#605850",
+                        "error": "#c0392b"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["EB Garamond", "serif"],
+                        "display": ["EB Garamond", "serif"],
+                        "body": ["Manrope", "sans-serif"],
+                        "label": ["Manrope", "sans-serif"]
+                    },
+                    "boxShadow": {
+                        'sahara': '0 2px 16px rgba(58, 48, 42, 0.04)',
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #faf5ee;
+            color: #3a302a;
+        }
+        .sahara-card {
+            background-color: #f6f0e8;
+            border: 1px solid rgba(216, 208, 200, 0.6);
+            box-shadow: 0 2px 16px rgba(58, 48, 42, 0.04);
+            border-radius: 0.75rem;
+        }
+        /* Chart specific styles for CSS drawing */
+        .chart-curve-base {
+            fill: none;
+            stroke: #9a9088;
+            stroke-width: 2;
+            stroke-dasharray: 4;
+        }
+        .chart-curve-stress {
+            fill: rgba(194, 101, 42, 0.1);
+            stroke: #c2652a;
+            stroke-width: 3;
+        }
+    </style>
+</head>
+<body class="font-body antialiased min-h-screen flex flex-col">
+<!-- TopNavBar (JSON Controlled) -->
+<nav class="bg-background dark:bg-background border-b border-outline-variant/60 shadow-sm flex justify-between items-center w-full px-8 py-4 sticky top-0 z-50">
+<div class="font-headline text-2xl italic text-primary dark:text-primary-fixed-dim tracking-tight">FinOptima</div>
+<div class="flex items-center gap-6 text-secondary dark:text-secondary-fixed-dim">
+<span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors duration-200">notifications</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors duration-200">settings</span>
+<span class="material-symbols-outlined cursor-pointer hover:text-primary transition-colors duration-200">account_circle</span>
+</div>
+</nav>
+<div class="flex flex-1 relative">
+<!-- SideNavBar (JSON Controlled) -->
+<!-- Note: JSON specifies fixed h-screen left-0 pt-20. To prevent overlap, main content gets ml-72 -->
+<aside class="bg-surface-container-low dark:bg-surface-container-lowest w-72 flex flex-col h-screen fixed left-0 top-0 pt-20 pb-8 px-4 z-40 border-r border-outline-variant/60 shadow-sm">
+<div class="mb-8 px-4 mt-4">
+<h2 class="font-headline text-xl text-primary mb-1">Navigation</h2>
+<p class="font-body text-label-large text-on-surface-variant">Risk Management Suite</p>
+</div>
+<ul class="flex-1 space-y-2">
+<li>
+<a class="flex items-center px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-highest/50 transition-all font-body text-label-large" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">dashboard</span>Executive Dashboard
+                    </a>
+</li>
+<!-- Active State -->
+<li>
+<a class="flex items-center px-4 py-3 text-primary font-bold border-r-4 border-primary bg-surface-container transition-all font-body text-label-large" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]" style="font-variation-settings: 'FILL' 1;">trending_up</span>Market Risk
+                    </a>
+</li>
+<li>
+<a class="flex items-center px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-highest/50 transition-all font-body text-label-large" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">grid_view</span>Portfolio Correlation
+                    </a>
+</li>
+<li>
+<a class="flex items-center px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-highest/50 transition-all font-body text-label-large" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">insights</span>Predictive Modeling
+                    </a>
+</li>
+<li>
+<a class="flex items-center px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container-highest/50 transition-all font-body text-label-large" href="#">
+<span class="material-symbols-outlined mr-3 text-[20px]">account_balance_wallet</span>Asset Allocation
+                    </a>
+</li>
+</ul>
+<div class="mt-auto px-2">
+<button class="w-full bg-primary text-on-primary py-3 px-4 rounded-lg font-body font-semibold shadow-sm hover:bg-primary-container hover:text-on-primary-container transition-all active:scale-[0.98]">
+                    Run Stress Test
+                </button>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-72 flex-1 p-10 flex flex-col gap-10">
+<!-- Header & Action Bar -->
+<header class="flex justify-between items-end">
+<div class="max-w-2xl">
+<h1 class="font-headline text-4xl text-on-surface mb-3 tracking-tight">Global Stress Testing Simulator</h1>
+<p class="text-lg text-on-surface-variant font-body">Configure extreme market scenarios to evaluate portfolio resilience and simulate potential capital depletion events.</p>
+</div>
+<div class="flex items-center gap-4">
+<button class="px-5 py-2.5 rounded-lg border border-outline-variant text-on-surface font-semibold hover:bg-surface-container transition-colors text-sm">
+                        Reset Baseline
+                    </button>
+<button class="px-5 py-2.5 rounded-lg border border-outline-variant text-on-surface font-semibold hover:bg-surface-container transition-colors text-sm flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">description</span> Regulatory Report
+                    </button>
+<button class="px-6 py-2.5 rounded-lg bg-primary text-on-primary font-semibold hover:bg-[#a65320] transition-colors text-sm shadow-sm">
+                        Apply Scenario
+                    </button>
+</div>
+</header>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-12 gap-8">
+<!-- Left Column: Scenario Configuration Panel -->
+<div class="col-span-12 xl:col-span-4 sahara-card p-8 flex flex-col gap-8">
+<div>
+<h3 class="font-headline text-2xl text-on-surface mb-1">Scenario Parameters</h3>
+<p class="text-sm text-on-surface-variant">Adjust macro stressors or load historical configurations.</p>
+</div>
+<!-- Presets -->
+<div>
+<label class="block text-xs font-bold uppercase tracking-wider text-secondary mb-2">Historical Preset</label>
+<div class="relative">
+<select class="w-full bg-surface-container border border-outline-variant rounded-lg py-3 px-4 appearance-none focus:ring-1 focus:ring-primary focus:border-primary text-on-surface font-body">
+<option>Custom Configuration</option>
+<option>2008 Financial Crisis</option>
+<option>1987 Black Monday</option>
+<option>COVID-19 Market Shock</option>
+<option>Dot-Com Bubble Burst</option>
+</select>
+<span class="material-symbols-outlined absolute right-4 top-3.5 text-on-surface-variant pointer-events-none">expand_more</span>
+</div>
+</div>
+<!-- Sliders -->
+<div class="space-y-6">
+<!-- Interest Rate -->
+<div>
+<div class="flex justify-between items-end mb-2">
+<label class="text-sm font-semibold text-on-surface">Interest Rate Spike</label>
+<span class="text-sm font-bold text-primary">+250 bps</span>
+</div>
+<input class="w-full h-1 bg-surface-variant rounded-lg appearance-none cursor-pointer accent-primary" max="500" min="0" type="range" value="250"/>
+</div>
+<!-- Equity Crash -->
+<div>
+<div class="flex justify-between items-end mb-2">
+<label class="text-sm font-semibold text-on-surface">Equity Market Crash</label>
+<span class="text-sm font-bold text-primary">-45%</span>
+</div>
+<input class="w-full h-1 bg-surface-variant rounded-lg appearance-none cursor-pointer accent-primary" max="80" min="0" type="range" value="45"/>
+</div>
+<!-- Volatility Surge -->
+<div>
+<div class="flex justify-between items-end mb-2">
+<label class="text-sm font-semibold text-on-surface">Volatility Surge (VIX)</label>
+<span class="text-sm font-bold text-primary">85</span>
+</div>
+<input class="w-full h-1 bg-surface-variant rounded-lg appearance-none cursor-pointer accent-primary" max="120" min="15" type="range" value="85"/>
+</div>
+<!-- Credit Spread -->
+<div>
+<div class="flex justify-between items-end mb-2">
+<label class="text-sm font-semibold text-on-surface">Credit Spread Widening</label>
+<span class="text-sm font-bold text-primary">+400 bps</span>
+</div>
+<input class="w-full h-1 bg-surface-variant rounded-lg appearance-none cursor-pointer accent-primary" max="800" min="0" type="range" value="400"/>
+</div>
+</div>
+<div class="mt-auto pt-4 border-t border-outline-variant/50">
+<div class="flex items-center gap-3 text-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-secondary">info</span>
+<p>Model confidence interval set to 99.9% VaR.</p>
+</div>
+</div>
+</div>
+<!-- Right Column: Visualizations -->
+<div class="col-span-12 xl:col-span-8 flex flex-col gap-8">
+<!-- Main Stage: Impact Visualization -->
+<div class="sahara-card p-8 flex-1 min-h-[400px] flex flex-col">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h3 class="font-headline text-2xl text-on-surface mb-1">Probability Density Impact</h3>
+<p class="text-sm text-on-surface-variant">Portfolio Value Distribution (Baseline vs. Stressed)</p>
+</div>
+<div class="flex gap-4 text-sm font-medium">
+<div class="flex items-center gap-2">
+<div class="w-3 h-0.5 border-t-2 border-dashed border-outline"></div>
+<span class="text-secondary">Current State</span>
+</div>
+<div class="flex items-center gap-2">
+<div class="w-3 h-3 bg-primary/20 border border-primary rounded-sm"></div>
+<span class="text-primary">Stressed Scenario</span>
+</div>
+</div>
+</div>
+<!-- Simulated Chart Area -->
+<div class="flex-1 relative w-full h-full mt-4 flex items-end">
+<!-- SVG drawing to simulate a beautiful density curve -->
+<svg class="w-full h-[280px]" preserveaspectratio="none" viewbox="0 0 800 300">
+<!-- Grid Lines -->
+<line opacity="0.5" stroke="#d8d0c8" stroke-dasharray="2" stroke-width="1" x1="0" x2="800" y1="50" y2="50"></line>
+<line opacity="0.5" stroke="#d8d0c8" stroke-dasharray="2" stroke-width="1" x1="0" x2="800" y1="150" y2="150"></line>
+<line opacity="0.5" stroke="#d8d0c8" stroke-dasharray="2" stroke-width="1" x1="0" x2="800" y1="250" y2="250"></line>
+<!-- Baseline Curve (Normal Distribution) -->
+<path class="chart-curve-base" d="M 50,280 Q 200,280 350,150 T 600,280"></path>
+<!-- Stressed Curve (Shifted left, fatter tail) -->
+<path class="chart-curve-stress" d="M 20,280 Q 150,280 250,80 T 500,280 Z"></path>
+<!-- VaR Markers -->
+<line stroke="#8c3c3c" stroke-dasharray="4" stroke-width="1" x1="180" x2="180" y1="80" y2="280"></line>
+<text fill="#8c3c3c" font-family="Manrope" font-size="12" x="185" y="100">Stressed 99% VaR</text>
+<line stroke="#78706a" stroke-dasharray="4" stroke-width="1" x1="280" x2="280" y1="150" y2="280"></line>
+<text fill="#78706a" font-family="Manrope" font-size="12" x="285" y="165">Current 99% VaR</text>
+<!-- Axes Base -->
+<line stroke="#9a9088" stroke-width="2" x1="0" x2="800" y1="280" y2="280"></line>
+</svg>
+<!-- X Axis Labels -->
+<div class="absolute bottom-[-24px] w-full flex justify-between text-xs text-secondary font-medium px-4">
+<span>-$500M</span>
+<span>-$250M</span>
+<span>$0</span>
+<span>+$250M</span>
+<span>+$500M</span>
+</div>
+</div>
+</div>
+<!-- Metrics Row -->
+<div class="grid grid-cols-2 gap-8">
+<!-- Capital Adequacy -->
+<div class="sahara-card p-6 flex flex-col justify-between">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h4 class="font-headline text-xl text-on-surface">CET1 Capital Adequacy</h4>
+<span class="text-xs text-on-surface-variant uppercase tracking-wider font-bold">Tier 1 Ratio</span>
+</div>
+<span class="material-symbols-outlined text-tertiary p-2 bg-error-container rounded-full">warning</span>
+</div>
+<div class="flex items-end gap-4 mb-4">
+<span class="text-5xl font-headline text-tertiary tracking-tight">6.8%</span>
+<span class="text-sm text-secondary mb-1 line-through">12.4% Baseline</span>
+</div>
+<!-- Progress Bar -->
+<div class="w-full relative">
+<div class="w-full h-2 bg-surface-variant rounded-full overflow-hidden">
+<div class="h-full bg-tertiary rounded-full" style="width: 45%;"></div>
+</div>
+<!-- Basel III Marker -->
+<div class="absolute top-[-4px] bottom-[-4px] w-0.5 bg-on-surface left-[30%]" title="Basel III Minimum (4.5%)"></div>
+<span class="absolute top-4 left-[28%] text-[10px] text-secondary font-bold">BASEL III MIN</span>
+</div>
+<p class="text-sm text-tertiary font-medium mt-6 bg-tertiary-fixed/30 p-3 rounded-lg border border-tertiary-fixed-dim">
+                                Scenario triggers severe capital depletion approaching regulatory minimums.
+                            </p>
+</div>
+<!-- Liquidity Drain -->
+<div class="sahara-card p-6 flex flex-col justify-between">
+<div class="flex justify-between items-start mb-6">
+<div>
+<h4 class="font-headline text-xl text-on-surface">Liquidity Coverage (LCR)</h4>
+<span class="text-xs text-on-surface-variant uppercase tracking-wider font-bold">30-Day Stress</span>
+</div>
+<span class="material-symbols-outlined text-primary p-2 bg-surface-container rounded-full">water_drop</span>
+</div>
+<div class="flex items-end gap-4 mb-4">
+<span class="text-5xl font-headline text-primary tracking-tight">88%</span>
+<span class="text-sm text-secondary mb-1">vs 125% Baseline</span>
+</div>
+<!-- Trend Line Mini -->
+<div class="h-12 w-full mt-2 relative overflow-hidden">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 100 40">
+<path d="M 0,10 Q 20,15 40,30 T 100,38" fill="none" stroke="#c2652a" stroke-width="2"></path>
+<circle cx="100" cy="38" fill="#c2652a" r="3"></circle>
+</svg>
+</div>
+<div class="flex items-center gap-2 mt-4 text-sm text-on-surface-variant border-t border-outline-variant/40 pt-4">
+<span class="material-symbols-outlined text-[16px]">hourglass_empty</span>
+                                Time to Depletion: <strong class="text-on-surface">14 Days</strong>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer (JSON Controlled) -->
+<footer class="mt-16 py-8 border-t border-outline-variant/60 flex flex-col md:flex-row items-center justify-between text-label-small text-secondary font-body">
+<div class="font-headline text-lg text-primary mb-4 md:mb-0">FinOptima</div>
+<div class="mb-4 md:mb-0">© 2024 FinOptima Risk Systems. All rights reserved.</div>
+<ul class="flex flex-wrap gap-6 uppercase tracking-wider">
+<li><a class="hover:text-primary transition-colors hover:underline" href="#">Regulatory Disclosures</a></li>
+<li><a class="hover:text-primary transition-colors hover:underline" href="#">Privacy Policy</a></li>
+<li><a class="hover:text-primary transition-colors hover:underline" href="#">Terms of Service</a></li>
+<li><a class="hover:text-primary transition-colors hover:underline" href="#">Compliance Documentation</a></li>
+</ul>
+</footer>
+</main>
+</div>
+</body></html>

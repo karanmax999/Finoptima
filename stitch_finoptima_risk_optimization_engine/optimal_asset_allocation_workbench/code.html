@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Optimal Asset Allocation Workbench - FinOptima</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700;800&amp;family=Manrope:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-dim": "#dcd6cc",
+                        "primary-fixed-dim": "#f0a878",
+                        "surface-container": "#f2ece4",
+                        "primary-fixed": "#fbe8d8",
+                        "on-secondary-container": "#605850",
+                        "tertiary-container": "#d47070",
+                        "surface-container-lowest": "#ffffff",
+                        "tertiary-fixed": "#fce0e0",
+                        "on-error": "#ffffff",
+                        "on-secondary-fixed": "#2a2420",
+                        "inverse-surface": "#3a302a",
+                        "secondary": "#78706a",
+                        "on-tertiary-fixed-variant": "#6e3030",
+                        "tertiary": "#8c3c3c",
+                        "error": "#c0392b",
+                        "on-tertiary-fixed": "#2e1515",
+                        "on-primary-fixed-variant": "#8a4518",
+                        "on-primary-fixed": "#401a08",
+                        "on-secondary": "#ffffff",
+                        "inverse-on-surface": "#faf5ee",
+                        "background": "#faf5ee",
+                        "error-container": "#fce4e0",
+                        "on-primary-container": "#fbe8d8",
+                        "on-surface-variant": "#605850",
+                        "on-error-container": "#7a1a10",
+                        "tertiary-fixed-dim": "#e8a0a0",
+                        "secondary-fixed-dim": "#cec6be",
+                        "on-background": "#3a302a",
+                        "secondary-fixed": "#eae2da",
+                        "inverse-primary": "#f0a878",
+                        "primary": "#c2652a",
+                        "outline-variant": "#d8d0c8",
+                        "surface-container-low": "#f6f0e8",
+                        "on-tertiary-container": "#3a2020",
+                        "primary-container": "#e08850",
+                        "on-surface": "#3a302a",
+                        "on-secondary-fixed-variant": "#504840",
+                        "surface": "#faf5ee",
+                        "outline": "#9a9088",
+                        "surface-container-highest": "#e6e0d6",
+                        "secondary-container": "#eae2da",
+                        "on-tertiary": "#ffffff",
+                        "surface-variant": "#ece6dc",
+                        "surface-tint": "#c2652a",
+                        "surface-container-high": "#ece6dc",
+                        "surface-bright": "#faf5ee",
+                        "on-primary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["EB Garamond", "serif"],
+                        "display": ["EB Garamond", "serif"],
+                        "body": ["Manrope", "sans-serif"],
+                        "label": ["Manrope", "sans-serif"]
+                    },
+                    "boxShadow": {
+                        "sahara-soft": "0 2px 16px rgba(58, 48, 42, 0.04)"
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; background-color: #faf5ee; color: #3a302a; }
+        h1, h2, h3, h4, h5, h6, .font-headline { font-family: 'EB Garamond', serif; }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .icon-fill { font-variation-settings: 'FILL' 1; }
+        
+        /* Custom scrollbar for modern feel */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #d8d0c8; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #9a9088; }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen antialiased selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface-dim fixed top-0 w-full z-50 border-b border-outline-variant/60 shadow-sm flex justify-between items-center h-16 px-8 max-w-full mx-auto">
+<div class="flex items-center gap-4">
+<div class="font-headline text-2xl font-bold text-primary dark:text-primary-fixed-dim tracking-tight">
+                FinOptima
+            </div>
+</div>
+<!-- Search Bar (on_right logic implied) -->
+<div class="flex-1 max-w-md mx-8 hidden md:block">
+<div class="relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant group-focus-within:text-primary transition-colors">search</span>
+<input class="w-full bg-surface-container-low border border-outline-variant/60 rounded-full py-2 pl-10 pr-4 text-sm font-body text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder:text-on-surface-variant/70" placeholder="Search portfolios, assets, models..." type="text"/>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined">account_balance</span>
+</button>
+<button class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 cursor-pointer active:opacity-80 relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-primary rounded-full"></span>
+</button>
+<button class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 cursor-pointer active:opacity-80">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="h-8 w-8 rounded-full overflow-hidden border border-outline-variant/60 ml-2">
+<img alt="User profile" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCQIm9oe9iiDYr5iBd8N6zo0Ezo1azlBO0UjZ0feL3h9Jgw1wbQZW-jiuvV788tOH_77LV6avycTdLTbIL3qEvnkq8WhFGC93B5Qs3_8hHp4HsgZ_tp_HCWa4qJwIETDTAGbKEqlkpa9vWG--IW6lh7s5dt9IPFAOshdkK5xOhHaHisbbN3bdgBLEq5PP8s7TrqKQW4ebRjN8Vw80K2M8lTQFMcmoolW3rh_7v_g6OTf84Kj5jv30g9xDg13SQDYCatQYn_sQXCWx8f"/>
+</div>
+</div>
+</header>
+<!-- Main Layout Container -->
+<div class="flex pt-16 min-h-screen">
+<!-- SideNavBar (Asset Allocation Active) -->
+<nav class="hidden md:flex flex-col pt-6 pb-20 bg-surface-container-low dark:bg-surface-container h-[calc(100vh-4rem)] w-64 fixed left-0 border-r border-outline-variant/60 overflow-y-auto">
+<div class="px-6 mb-8">
+<h2 class="font-headline text-lg text-on-surface font-semibold tracking-wide">Risk Management</h2>
+<p class="font-body text-xs text-on-surface-variant mt-1">Institutional Grade Engine</p>
+</div>
+<div class="flex flex-col gap-1 flex-1">
+<a class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-variant/50 rounded-lg px-4 py-3 mx-2 hover:bg-surface-variant transition-all duration-150 scale-95 duration-100 font-body text-label-lg font-medium" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+                    Executive Dashboard
+                </a>
+<a class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-variant/50 rounded-lg px-4 py-3 mx-2 hover:bg-surface-variant transition-all duration-150 scale-95 duration-100 font-body text-label-lg font-medium" href="#">
+<span class="material-symbols-outlined">analytics</span>
+                    Market Risk
+                </a>
+<a class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-variant/50 rounded-lg px-4 py-3 mx-2 hover:bg-surface-variant transition-all duration-150 scale-95 duration-100 font-body text-label-lg font-medium" href="#">
+<span class="material-symbols-outlined">hub</span>
+                    Portfolio Correlation
+                </a>
+<a class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-variant/50 rounded-lg px-4 py-3 mx-2 hover:bg-surface-variant transition-all duration-150 scale-95 duration-100 font-body text-label-lg font-medium" href="#">
+<span class="material-symbols-outlined">query_stats</span>
+                    Predictive Modeling
+                </a>
+<a class="flex items-center gap-3 bg-primary-container text-on-primary-container rounded-lg px-4 py-3 mx-2 font-body text-label-lg font-medium" href="#">
+<span class="material-symbols-outlined icon-fill">pie_chart</span>
+                    Asset Allocation
+                </a>
+</div>
+<div class="px-4 mt-8 mb-6">
+<button class="w-full bg-primary hover:bg-primary/90 text-on-primary font-body font-semibold py-2.5 rounded-lg transition-colors shadow-sm text-sm">
+                    Run Stress Test
+                </button>
+</div>
+<div class="flex flex-col gap-1 mt-auto border-t border-outline-variant/40 pt-4 px-2">
+<a class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-variant/50 rounded-lg px-4 py-2 font-body text-sm font-medium transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">description</span>
+                    Documentation
+                </a>
+<a class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-variant/50 rounded-lg px-4 py-2 font-body text-sm font-medium transition-colors" href="#">
+<span class="material-symbols-outlined text-sm">help</span>
+                    Support
+                </a>
+</div>
+</nav>
+<!-- Main Content Canvas -->
+<main class="flex-1 ml-0 md:ml-64 p-6 md:p-10 pb-24 overflow-x-hidden">
+<!-- Page Header -->
+<div class="flex flex-col md:flex-row md:justify-between md:items-end mb-10 gap-4">
+<div>
+<div class="flex items-center gap-2 text-on-surface-variant mb-2">
+<span class="font-body text-xs font-semibold tracking-wider uppercase text-primary">Module 4</span>
+<span class="w-1 h-1 rounded-full bg-outline-variant"></span>
+<span class="font-body text-xs font-medium">Execution Engine</span>
+</div>
+<h1 class="font-headline text-4xl md:text-5xl font-bold text-on-surface leading-tight tracking-tight">Optimal Asset Allocation Workbench</h1>
+<p class="font-body text-base text-on-surface-variant mt-2 max-w-2xl">Translating complex statistical findings into actionable capital deployment strategies across multi-asset portfolios.</p>
+</div>
+<div class="flex gap-3">
+<button class="px-5 py-2.5 border border-outline-variant text-on-surface font-body font-semibold text-sm rounded-lg hover:border-primary hover:text-primary transition-all flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">download</span>
+                        Export IPS
+                    </button>
+<button class="px-5 py-2.5 bg-primary text-on-primary font-body font-semibold text-sm rounded-lg hover:bg-primary/90 transition-all shadow-sahara-soft flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">play_arrow</span>
+                        Execute Trades
+                    </button>
+</div>
+</div>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-6 lg:gap-8">
+<!-- Execution Summary (Top spanning) -->
+<div class="xl:col-span-12 bg-surface-container-lowest rounded-xl p-6 lg:p-8 border border-outline-variant/40 shadow-sahara-soft relative overflow-hidden">
+<div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+<div class="flex items-center justify-between mb-6">
+<h2 class="font-headline text-2xl font-bold text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">insights</span>
+                            Optimization Summary
+                        </h2>
+<span class="px-3 py-1 bg-surface-variant text-on-surface font-body text-xs font-semibold rounded-full border border-outline-variant/60">Target: Global Balanced</span>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-6 relative z-10">
+<div class="border-l-2 border-primary/30 pl-4">
+<p class="font-body text-sm text-on-surface-variant mb-1">Expected Return (Ann.)</p>
+<p class="font-headline text-3xl font-bold text-on-surface">8.42% <span class="text-sm font-body text-primary font-medium ml-1">+1.2%</span></p>
+</div>
+<div class="border-l-2 border-outline-variant pl-4">
+<p class="font-body text-sm text-on-surface-variant mb-1">Portfolio Volatility</p>
+<p class="font-headline text-3xl font-bold text-on-surface">11.05% <span class="text-sm font-body text-secondary font-medium ml-1">-0.4%</span></p>
+</div>
+<div class="border-l-2 border-outline-variant pl-4">
+<p class="font-body text-sm text-on-surface-variant mb-1">Sharpe Ratio</p>
+<p class="font-headline text-3xl font-bold text-on-surface">1.24 <span class="text-sm font-body text-primary font-medium ml-1">+0.15</span></p>
+</div>
+<div class="border-l-2 border-outline-variant pl-4">
+<p class="font-body text-sm text-on-surface-variant mb-1">Max Drawdown (Est)</p>
+<p class="font-headline text-3xl font-bold text-on-surface">14.2%</p>
+</div>
+</div>
+</div>
+<!-- Left Column: Math & Constraints -->
+<div class="xl:col-span-5 flex flex-col gap-6 lg:gap-8">
+<!-- LPP Formulation Workspace -->
+<div class="bg-surface-container-low rounded-xl p-6 border border-outline-variant/60 shadow-sahara-soft flex-1">
+<div class="flex justify-between items-center mb-5">
+<h3 class="font-headline text-xl font-bold text-on-surface">Formulation Workspace</h3>
+<button class="text-on-surface-variant hover:text-primary transition-colors"><span class="material-symbols-outlined text-sm">edit</span></button>
+</div>
+<div class="space-y-6">
+<!-- Objective -->
+<div>
+<p class="font-body text-xs font-semibold text-tertiary tracking-wider uppercase mb-2">Objective Function</p>
+<div class="bg-surface-container-lowest p-4 rounded-lg border border-outline-variant/40 font-mono text-sm text-on-surface">
+<span class="text-primary font-bold">Maximize:</span> ∑ (w<sub>i</sub> × E[R<sub>i</sub>])
+                                </div>
+</div>
+<!-- Constraints -->
+<div>
+<p class="font-body text-xs font-semibold text-secondary tracking-wider uppercase mb-2">Active Constraints (Basel III Aligned)</p>
+<div class="space-y-2">
+<div class="flex items-center justify-between p-3 bg-surface-container-lowest rounded border border-outline-variant/20 hover:border-primary/40 transition-colors cursor-default">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary text-sm">check_circle</span>
+<span class="font-body text-sm font-medium">Budget Constraint</span>
+</div>
+<span class="font-mono text-xs text-on-surface-variant">∑ w<sub>i</sub> = 1</span>
+</div>
+<div class="flex items-center justify-between p-3 bg-surface-container-lowest rounded border border-outline-variant/20 hover:border-primary/40 transition-colors cursor-default">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary text-sm">check_circle</span>
+<span class="font-body text-sm font-medium">Long-Only Restriction</span>
+</div>
+<span class="font-mono text-xs text-on-surface-variant">w<sub>i</sub> ≥ 0</span>
+</div>
+<div class="flex items-center justify-between p-3 bg-surface-container-lowest rounded border border-outline-variant/20 hover:border-primary/40 transition-colors cursor-default">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary text-sm">check_circle</span>
+<span class="font-body text-sm font-medium">Max VaR (99%, 10d)</span>
+</div>
+<span class="font-mono text-xs text-on-surface-variant">≤ 4.5%</span>
+</div>
+<div class="flex items-center justify-between p-3 bg-surface-container-lowest rounded border border-outline-variant/20 hover:border-primary/40 transition-colors cursor-default">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary text-sm">warning</span>
+<span class="font-body text-sm font-medium text-tertiary">CET1 Capital Min</span>
+</div>
+<span class="font-mono text-xs text-on-surface-variant">≥ 8.0%</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Constraint Sensitivity Toggles -->
+<div class="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/40 shadow-sahara-soft">
+<h3 class="font-headline text-xl font-bold text-on-surface mb-5">Constraint Sensitivity</h3>
+<div class="space-y-5">
+<div>
+<div class="flex justify-between items-center mb-2">
+<label class="font-body text-sm font-medium text-on-surface">Risk Tolerance (Lambda)</label>
+<span class="font-mono text-xs text-primary font-semibold">Moderate (2.5)</span>
+</div>
+<div class="relative w-full h-1 bg-surface-variant rounded-full">
+<div class="absolute top-0 left-0 h-full bg-primary rounded-full w-1/2"></div>
+<div class="absolute top-1/2 left-1/2 -translate-y-1/2 w-4 h-4 bg-surface rounded-full border-2 border-primary shadow-sm cursor-pointer"></div>
+</div>
+<div class="flex justify-between mt-1 text-[10px] font-body text-on-surface-variant uppercase">
+<span>Conservative</span>
+<span>Aggressive</span>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-2">
+<label class="font-body text-sm font-medium text-on-surface">Max Single Asset Exposure</label>
+<span class="font-mono text-xs text-on-surface-variant">15%</span>
+</div>
+<div class="relative w-full h-1 bg-surface-variant rounded-full">
+<div class="absolute top-0 left-0 h-full bg-secondary rounded-full w-[15%]"></div>
+<div class="absolute top-1/2 left-[15%] -translate-y-1/2 w-3 h-3 bg-surface rounded-full border-2 border-secondary shadow-sm cursor-pointer"></div>
+</div>
+</div>
+<div class="pt-2 flex justify-end">
+<button class="text-sm font-body font-semibold text-primary hover:text-primary-container transition-colors">Recalculate Optimal Point</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Visuals & Output -->
+<div class="xl:col-span-7 flex flex-col gap-6 lg:gap-8">
+<!-- The Simplex Path Optimizer -->
+<div class="bg-surface-container-lowest rounded-xl p-6 border border-outline-variant/40 shadow-sahara-soft h-80 relative flex flex-col">
+<div class="flex justify-between items-center mb-4">
+<h3 class="font-headline text-xl font-bold text-on-surface">Efficient Frontier Convergence</h3>
+<div class="flex gap-2">
+<span class="flex items-center gap-1 font-body text-xs text-on-surface-variant"><span class="w-2 h-2 rounded-full bg-secondary"></span> Current</span>
+<span class="flex items-center gap-1 font-body text-xs text-on-surface-variant"><span class="w-2 h-2 rounded-full bg-primary"></span> Optimal</span>
+</div>
+</div>
+<!-- Abstract Representation of Chart (Data Visualization context) -->
+<div class="flex-1 w-full bg-surface-container-low rounded border border-outline-variant/20 relative overflow-hidden flex items-end px-4 pb-4">
+<!-- This represents a stylized graph area without an actual image, fitting the minimalist aesthetic -->
+<!-- X/Y Axis -->
+<div class="absolute left-4 bottom-4 top-4 w-px bg-outline-variant/60"></div>
+<div class="absolute left-4 bottom-4 right-4 h-px bg-outline-variant/60"></div>
+<!-- Axis Labels -->
+<span class="absolute left-6 top-4 font-body text-[10px] text-on-surface-variant tracking-wider">Expected Return</span>
+<span class="absolute right-4 bottom-6 font-body text-[10px] text-on-surface-variant tracking-wider">Risk (Volatility)</span>
+<!-- Curve (CSS drawn for simplicity/aesthetic) -->
+<div class="absolute left-4 bottom-4 w-[90%] h-[80%] border-l-0 border-b-0 border-t-2 border-r-2 border-primary/40 rounded-tr-[100%] opacity-50"></div>
+<!-- Current Point -->
+<div class="absolute left-[40%] bottom-[30%] w-3 h-3 bg-secondary rounded-full shadow-md z-10 -translate-x-1/2 translate-y-1/2 ring-4 ring-secondary/20"></div>
+<!-- Trajectory line (dashed) -->
+<svg class="absolute left-[40%] bottom-[30%] w-[20%] h-[30%] z-0" style="overflow: visible;">
+<line class="opacity-50" stroke="#c2652a" stroke-dasharray="4 4" stroke-width="1.5" x1="0" x2="100%" y1="0" y2="-100%"></line>
+</svg>
+<!-- Optimal Point -->
+<div class="absolute left-[60%] bottom-[60%] w-4 h-4 bg-primary rounded-full shadow-md z-10 -translate-x-1/2 translate-y-1/2 ring-4 ring-primary/30 flex items-center justify-center">
+<div class="w-1.5 h-1.5 bg-surface rounded-full"></div>
+</div>
+<!-- Data Tooltip style -->
+<div class="absolute left-[63%] bottom-[65%] bg-inverse-surface text-inverse-on-surface px-2 py-1 rounded text-[10px] font-body shadow-lg whitespace-nowrap">
+                                 Sharpe Max Point
+                             </div>
+</div>
+</div>
+<!-- Allocation Recommendations (Current vs Optimal Table) -->
+<div class="bg-surface-container-lowest rounded-xl p-0 border border-outline-variant/40 shadow-sahara-soft overflow-hidden flex-1">
+<div class="p-6 border-b border-outline-variant/30 flex justify-between items-center">
+<h3 class="font-headline text-xl font-bold text-on-surface">Capital Deployment Shift</h3>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low/50 font-body text-xs text-on-surface-variant uppercase tracking-wider">
+<th class="px-6 py-4 font-semibold">Asset Class</th>
+<th class="px-6 py-4 font-semibold text-right">Current Alloc.</th>
+<th class="px-6 py-4 font-semibold text-right">Optimal Alloc.</th>
+<th class="px-6 py-4 font-semibold text-right">Delta</th>
+<th class="px-6 py-4 font-semibold text-center">Action</th>
+</tr>
+</thead>
+<tbody class="font-body text-sm divide-y divide-outline-variant/20">
+<tr class="hover:bg-surface-container-low/30 transition-colors">
+<td class="px-6 py-4 font-medium text-on-surface flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#2a2420]"></span> Equities (Global)
+                                        </td>
+<td class="px-6 py-4 text-right text-on-surface-variant">45.0%</td>
+<td class="px-6 py-4 text-right font-semibold text-on-surface">52.5%</td>
+<td class="px-6 py-4 text-right text-primary font-medium">+7.5%</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center justify-center px-2 py-1 rounded bg-primary/10 text-primary text-xs font-bold border border-primary/20">BUY</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low/30 transition-colors">
+<td class="px-6 py-4 font-medium text-on-surface flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#78706a]"></span> Fixed Income (Sov)
+                                        </td>
+<td class="px-6 py-4 text-right text-on-surface-variant">30.0%</td>
+<td class="px-6 py-4 text-right font-semibold text-on-surface">22.0%</td>
+<td class="px-6 py-4 text-right text-tertiary font-medium">-8.0%</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center justify-center px-2 py-1 rounded bg-tertiary/10 text-tertiary text-xs font-bold border border-tertiary/20">SELL</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low/30 transition-colors">
+<td class="px-6 py-4 font-medium text-on-surface flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#c2652a]"></span> Corp Credit (IG)
+                                        </td>
+<td class="px-6 py-4 text-right text-on-surface-variant">15.0%</td>
+<td class="px-6 py-4 text-right font-semibold text-on-surface">15.5%</td>
+<td class="px-6 py-4 text-right text-primary font-medium">+0.5%</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center justify-center px-2 py-1 rounded bg-surface-variant text-on-surface-variant text-xs font-bold border border-outline-variant/40">HOLD</span>
+</td>
+</tr>
+<tr class="hover:bg-surface-container-low/30 transition-colors">
+<td class="px-6 py-4 font-medium text-on-surface flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-[#f0a878]"></span> Commodities / Alts
+                                        </td>
+<td class="px-6 py-4 text-right text-on-surface-variant">10.0%</td>
+<td class="px-6 py-4 text-right font-semibold text-on-surface">10.0%</td>
+<td class="px-6 py-4 text-right text-on-surface-variant font-medium">0.0%</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center justify-center px-2 py-1 rounded bg-surface-variant text-on-surface-variant text-xs font-bold border border-outline-variant/40">HOLD</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer -->
+<footer class="bg-surface-container-lowest dark:bg-surface-dim w-full fixed bottom-0 z-40 border-t border-outline-variant/40 flex justify-between items-center px-8 py-3 md:ml-64 transition-all duration-200" style="width: calc(100% - 16rem);">
+<p class="font-body text-label-small text-on-surface-variant/80 hidden sm:block">© 2024 FinOptima. Regulatory compliance: Fully aligned with Basel III/IV and IFRS 9 standards.</p>
+<p class="font-body text-label-small text-on-surface-variant/80 sm:hidden">© 2024 FinOptima.</p>
+<div class="flex gap-4 sm:gap-6">
+<a class="font-body text-label-small text-on-surface-variant hover:text-primary transition-opacity duration-200" href="#">Regulatory Disclosure</a>
+<a class="font-body text-label-small text-on-surface-variant hover:text-primary transition-opacity duration-200" href="#">Privacy Policy</a>
+<a class="font-body text-label-small text-on-surface-variant hover:text-primary transition-opacity duration-200" href="#">Audit Log</a>
+</div>
+</footer>
+</body></html>

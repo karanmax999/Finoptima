@@ -1,0 +1,71 @@
+/** @type {import('tailwindcss').Config} */
+export default {
+  darkMode: "class",
+  content: [
+    "./index.html",
+    "./src/**/*.{js,ts,jsx,tsx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        "surface-container": "#f2ece4",
+        "on-secondary-container": "#605850",
+        "error-container": "#fce4e0",
+        "outline-variant": "#d8d0c8",
+        "surface": "#faf5ee",
+        "secondary-fixed-dim": "#cec6be",
+        "on-tertiary-fixed-variant": "#6e3030",
+        "on-primary-fixed-variant": "#8a4518",
+        "on-primary-container": "#fbe8d8",
+        "on-tertiary-container": "#3a2020",
+        "inverse-primary": "#f0a878",
+        "surface-container-lowest": "#ffffff",
+        "primary-fixed-dim": "#f0a878",
+        "secondary-container": "#eae2da",
+        "on-secondary-fixed-variant": "#504840",
+        "secondary-fixed": "#eae2da",
+        "on-secondary": "#ffffff",
+        "surface-variant": "#ece6dc",
+        "inverse-surface": "#3a302a",
+        "on-tertiary": "#ffffff",
+        "tertiary-fixed-dim": "#e8a0a0",
+        "on-error-container": "#7a1a10",
+        "background": "#faf5ee",
+        "surface-container-highest": "#e6e0d6",
+        "on-error": "#ffffff",
+        "on-primary-fixed": "#401a08",
+        "inverse-on-surface": "#faf5ee",
+        "on-surface-variant": "#605850",
+        "on-surface": "#3a302a",
+        "on-secondary-fixed": "#2a2420",
+        "primary": "#c2652a",
+        "outline": "#9a9088",
+        "primary-container": "#e08850",
+        "on-primary": "#ffffff",
+        "tertiary-container": "#d47070",
+        "surface-container-high": "#ece6dc",
+        "surface-bright": "#faf5ee",
+        "secondary": "#78706a",
+        "on-tertiary-fixed": "#2e1515",
+        "surface-tint": "#c2652a",
+        "primary-fixed": "#fbe8d8",
+        "tertiary-fixed": "#fce0e0",
+        "surface-container-low": "#f6f0e8",
+        "error": "#c0392b",
+        "tertiary": "#8c3c3c",
+        "surface-dim": "#dcd6cc",
+        "on-background": "#3a302a"
+      },
+      fontFamily: {
+        "headline": ["EB Garamond", "serif"],
+        "display": ["EB Garamond", "serif"],
+        "body": ["Manrope", "sans-serif"],
+        "label": ["Manrope", "sans-serif"]
+      },
+      boxShadow: {
+        "sahara-soft": "0 2px 16px rgba(58, 48, 42, 0.04)"
+      }
+    },
+  },
+  plugins: [],
+}

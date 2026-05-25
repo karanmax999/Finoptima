@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>FinOptima - Portfolio Correlation &amp; Stress Testing</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400..800;1,400..800&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-fixed-dim": "#cec6be",
+                      "on-error": "#ffffff",
+                      "inverse-primary": "#f0a878",
+                      "on-primary-fixed": "#401a08",
+                      "surface-container": "#f2ece4",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-container-high": "#ece6dc",
+                      "on-primary-fixed-variant": "#8a4518",
+                      "on-primary": "#ffffff",
+                      "surface-tint": "#c2652a",
+                      "on-secondary-fixed": "#2a2420",
+                      "tertiary-fixed-dim": "#e8a0a0",
+                      "secondary": "#78706a",
+                      "background": "#faf5ee",
+                      "surface": "#faf5ee",
+                      "secondary-container": "#eae2da",
+                      "primary-container": "#e08850",
+                      "surface-bright": "#faf5ee",
+                      "on-secondary-container": "#605850",
+                      "secondary-fixed": "#eae2da",
+                      "on-tertiary-fixed-variant": "#6e3030",
+                      "inverse-on-surface": "#faf5ee",
+                      "on-tertiary-container": "#3a2020",
+                      "on-background": "#3a302a",
+                      "surface-container-highest": "#e6e0d6",
+                      "on-tertiary-fixed": "#2e1515",
+                      "on-surface": "#3a302a",
+                      "on-tertiary": "#ffffff",
+                      "primary-fixed-dim": "#f0a878",
+                      "outline-variant": "#d8d0c8",
+                      "primary-fixed": "#fbe8d8",
+                      "on-surface-variant": "#605850",
+                      "on-error-container": "#7a1a10",
+                      "tertiary": "#8c3c3c",
+                      "surface-variant": "#ece6dc",
+                      "outline": "#9a9088",
+                      "error": "#c0392b",
+                      "tertiary-fixed": "#fce0e0",
+                      "on-secondary-fixed-variant": "#504840",
+                      "inverse-surface": "#3a302a",
+                      "on-primary-container": "#fbe8d8",
+                      "surface-container-low": "#f6f0e8",
+                      "primary": "#c2652a",
+                      "on-secondary": "#ffffff",
+                      "tertiary-container": "#d47070",
+                      "surface-dim": "#dcd6cc",
+                      "error-container": "#fce4e0"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {},
+              "fontFamily": {
+                      "headline": [
+                              "Eb Garamond"
+                      ],
+                      "display": [
+                              "Eb Garamond"
+                      ],
+                      "body": [
+                              "Manrope"
+                      ],
+                      "label": [
+                              "Manrope"
+                      ]
+              },
+              "fontSize": {}
+      },
+          },
+        }
+    </script>
+<style>
+        body { font-family: 'Manrope', sans-serif; background-color: theme('colors.background'); color: theme('colors.on-background'); }
+        h1, h2, h3, h4, h5, h6, .font-headline { font-family: 'Eb Garamond', serif; }
+        
+        /* Subtle shadow utility from Design System */
+        .shadow-soft { box-shadow: 0 2px 16px rgba(58, 48, 42, 0.04); }
+        
+        /* Heatmap cell base */
+        .heatmap-cell { transition: all 0.2s ease; border: 1px solid theme('colors.surface-container-highest'); }
+        .heatmap-cell:hover { opacity: 0.8; transform: scale(1.05); z-index: 10; border-color: theme('colors.primary'); }
+        
+        /* Simulated distribution curve for VaR */
+        .distribution-curve {
+            position: relative;
+            height: 120px;
+            width: 100%;
+            background: linear-gradient(to right, 
+                rgba(194, 101, 42, 0.2) 0%, 
+                rgba(194, 101, 42, 0.2) 15%, /* Tail risk area */
+                rgba(216, 208, 200, 0.3) 15%, 
+                rgba(216, 208, 200, 0.3) 100%);
+            border-bottom: 1px solid theme('colors.outline-variant');
+            overflow: hidden;
+        }
+        
+        .curve-path {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            fill: none;
+            stroke: theme('colors.primary');
+            stroke-width: 2;
+        }
+
+        /* CLT Simulation animation */
+        .clt-bar {
+            transition: height 0.5s ease-in-out, background-color 0.5s ease;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col font-body">
+<!-- TopAppBar Component -->
+<header class="bg-surface dark:bg-surface-dim font-headline text-headline-md font-bold text-on-surface fixed top-0 w-full z-50 border-b border-outline-variant/60 shadow-sm flex justify-between items-center h-16 px-8 max-w-full mx-auto">
+<div class="flex items-center gap-4">
+<span class="font-headline text-2xl font-bold text-primary dark:text-primary-fixed-dim tracking-tight">FinOptima</span>
+</div>
+<div class="flex-1 flex justify-end">
+<!-- Search bar omitted per instruction (on_right logic but focusing on actions) -->
+</div>
+<div class="flex items-center gap-6">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:text-primary transition-colors duration-200 cursor-pointer active:opacity-80" data-icon="account_balance">account_balance</span>
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:text-primary transition-colors duration-200 cursor-pointer active:opacity-80" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:text-primary transition-colors duration-200 cursor-pointer active:opacity-80" data-icon="settings">settings</span>
+<div class="w-8 h-8 rounded-full bg-surface-container-high overflow-hidden border border-outline-variant">
+<img alt="User profile" class="w-full h-full object-cover" data-alt="A close-up portrait of a professional individual in a warm-lit corporate environment. The lighting is soft and golden, reflecting the Sahara design system. High resolution, editorial style." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0D6qwPxr8zhl7FoPwHr2fogs9kKkph0phWQGet17Bluzrltb3Pblzn-_O4oo_8VgQepY_YGJfwZLcYDPDN2wcovD0TqMzDfQf6CBLve77_tKn861ztwq6u-lTjOwkUDJFOVDNdz6Z60LPfrIfkX9p-GkXu42U9P5wAvCvBPvUia5sf_ByOOHaRGQ7UwVbpBQFpvf5igj9lJnZB3OkIgowZvZcv1DX1gawuWtvYJpvyWAds3XF5uODHJ0sMniaT9Bna7ZstkHPhW8j"/>
+</div>
+</div>
+</header>
+<div class="flex flex-1 pt-16">
+<!-- SideNavBar Component -->
+<nav class="bg-surface-container-low dark:bg-surface-container font-body text-label-lg font-medium text-on-surface-variant h-screen w-64 fixed left-0 top-16 bg-surface-container-low border-r border-outline-variant/60 flex flex-col pt-6 pb-20 z-40 hidden md:flex">
+<div class="px-6 mb-8">
+<h2 class="font-headline text-lg text-on-surface">Risk Management</h2>
+<p class="text-sm text-on-surface-variant mt-1">Institutional Grade Engine</p>
+<button class="mt-4 w-full bg-primary text-on-primary py-2 rounded-lg font-medium hover:bg-primary/90 transition-colors shadow-soft">Run Stress Test</button>
+</div>
+<div class="flex-1 overflow-y-auto">
+<ul class="space-y-2">
+<li>
+<a class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-variant/50 rounded-lg px-4 py-3 mx-2 hover:bg-surface-variant transition-all duration-150 scale-95 duration-100" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
+                            Executive Dashboard
+                        </a>
+</li>
+<li>
+<a class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-variant/50 rounded-lg px-4 py-3 mx-2 hover:bg-surface-variant transition-all duration-150 scale-95 duration-100" href="#">
+<span class="material-symbols-outlined" data-icon="analytics">analytics</span>
+                            Market Risk
+                        </a>
+</li>
+<li>
+<a class="flex items-center gap-3 bg-primary-container text-on-primary-container rounded-lg px-4 py-3 mx-2 hover:bg-surface-variant transition-all duration-150 scale-95 duration-100" href="#">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+                            Portfolio Correlation
+                        </a>
+</li>
+<li>
+<a class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-variant/50 rounded-lg px-4 py-3 mx-2 hover:bg-surface-variant transition-all duration-150 scale-95 duration-100" href="#">
+<span class="material-symbols-outlined" data-icon="query_stats">query_stats</span>
+                            Predictive Modeling
+                        </a>
+</li>
+<li>
+<a class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-variant/50 rounded-lg px-4 py-3 mx-2 hover:bg-surface-variant transition-all duration-150 scale-95 duration-100" href="#">
+<span class="material-symbols-outlined" data-icon="pie_chart">pie_chart</span>
+                            Asset Allocation
+                        </a>
+</li>
+</ul>
+</div>
+<div class="mt-auto border-t border-outline-variant/40 pt-4 px-2">
+<ul class="space-y-2">
+<li>
+<a class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-variant/50 rounded-lg px-4 py-3 mx-2" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+                            Documentation
+                        </a>
+</li>
+<li>
+<a class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-variant/50 rounded-lg px-4 py-3 mx-2" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+                            Support
+                        </a>
+</li>
+</ul>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 ml-0 md:ml-64 p-8 lg:p-12 pb-24 overflow-x-hidden">
+<!-- Header -->
+<div class="mb-10">
+<h1 class="font-headline text-4xl text-on-background mb-2">Portfolio Correlation Analysis</h1>
+<p class="text-on-surface-variant max-w-2xl text-lg">Evaluate cross-asset dependencies and systemic vulnerabilities under varied market conditions.</p>
+</div>
+<!-- Metric Cards (Bento style row) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-soft border border-outline-variant/30 relative overflow-hidden">
+<div class="absolute top-0 right-0 p-4 opacity-10">
+<span class="material-symbols-outlined text-6xl" data-icon="scatter_plot">scatter_plot</span>
+</div>
+<p class="text-sm font-medium text-on-surface-variant mb-1 uppercase tracking-wider">Diversification Score</p>
+<div class="flex items-end gap-3">
+<span class="font-headline text-4xl text-primary font-semibold">84.2</span>
+<span class="text-sm text-secondary mb-1">/ 100</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-3 pt-3 border-t border-outline-variant/40">+2.1 from previous quarter</p>
+</div>
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-soft border border-outline-variant/30">
+<p class="text-sm font-medium text-on-surface-variant mb-1 uppercase tracking-wider">Avg. Cross-Correlation</p>
+<div class="flex items-end gap-3">
+<span class="font-headline text-4xl text-on-background font-semibold">0.34</span>
+</div>
+<div class="mt-4 w-full bg-surface-container-highest rounded-full h-1.5">
+<div class="bg-secondary h-1.5 rounded-full" style="width: 34%"></div>
+</div>
+<p class="text-xs text-on-surface-variant mt-2 text-right">Moderate coupling</p>
+</div>
+<div class="bg-surface-container-low rounded-xl p-6 shadow-soft border border-primary/20">
+<div class="flex justify-between items-start">
+<p class="text-sm font-medium text-on-surface-variant mb-1 uppercase tracking-wider">Estimated VaR (99%)</p>
+<span class="material-symbols-outlined text-error text-sm" data-icon="warning">warning</span>
+</div>
+<div class="flex items-end gap-3">
+<span class="font-headline text-4xl text-tertiary font-semibold">$1.4M</span>
+</div>
+<p class="text-xs text-on-surface-variant mt-3 pt-3 border-t border-outline-variant/40">10-day horizon projection</p>
+</div>
+</div>
+<!-- Complex Grid Layout -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+<!-- Asset Covariance Matrix (Takes up 2 columns on large screens) -->
+<div class="lg:col-span-2 bg-surface-container-lowest rounded-xl p-8 shadow-soft border border-outline-variant/30">
+<div class="flex justify-between items-center mb-6">
+<h3 class="font-headline text-2xl text-on-background">Asset Correlation Heatmap</h3>
+<div class="flex gap-2 text-xs">
+<span class="px-2 py-1 bg-surface-container rounded text-on-surface-variant">30D</span>
+<span class="px-2 py-1 bg-primary-container text-on-primary-container rounded font-medium">90D</span>
+<span class="px-2 py-1 bg-surface-container rounded text-on-surface-variant">1Y</span>
+</div>
+</div>
+<p class="text-sm text-on-surface-variant mb-6">Visualizing Pearson correlation coefficients across primary sectors.</p>
+<!-- Heatmap Grid -->
+<div class="overflow-x-auto">
+<div class="min-w-[500px]">
+<!-- Header Row -->
+<div class="flex mb-2">
+<div class="w-24"></div> <!-- Empty corner -->
+<div class="flex-1 text-xs text-center font-medium text-on-surface-variant rotate-[-45deg] origin-bottom-left pb-2">Tech</div>
+<div class="flex-1 text-xs text-center font-medium text-on-surface-variant rotate-[-45deg] origin-bottom-left pb-2">Fin</div>
+<div class="flex-1 text-xs text-center font-medium text-on-surface-variant rotate-[-45deg] origin-bottom-left pb-2">Egy</div>
+<div class="flex-1 text-xs text-center font-medium text-on-surface-variant rotate-[-45deg] origin-bottom-left pb-2">RE</div>
+<div class="flex-1 text-xs text-center font-medium text-on-surface-variant rotate-[-45deg] origin-bottom-left pb-2">Hlth</div>
+</div>
+<!-- Rows -->
+<div class="flex items-center mb-1">
+<div class="w-24 text-xs font-medium text-on-surface-variant">Technology</div>
+<div class="flex-1 aspect-square bg-[#c2652a] opacity-100 heatmap-cell rounded-sm flex items-center justify-center text-white text-[10px]">1.0</div>
+<div class="flex-1 aspect-square bg-[#c2652a] opacity-[0.6] heatmap-cell rounded-sm flex items-center justify-center text-white text-[10px]">0.62</div>
+<div class="flex-1 aspect-square bg-[#8c3c3c] opacity-[0.2] heatmap-cell rounded-sm flex items-center justify-center text-[#3a302a] text-[10px]">-0.15</div>
+<div class="flex-1 aspect-square bg-[#c2652a] opacity-[0.4] heatmap-cell rounded-sm flex items-center justify-center text-[#3a302a] text-[10px]">0.38</div>
+<div class="flex-1 aspect-square bg-[#c2652a] opacity-[0.3] heatmap-cell rounded-sm flex items-center justify-center text-[#3a302a] text-[10px]">0.22</div>
+</div>
+<div class="flex items-center mb-1">
+<div class="w-24 text-xs font-medium text-on-surface-variant">Financials</div>
+<div class="flex-1 aspect-square bg-[#c2652a] opacity-[0.6] heatmap-cell rounded-sm flex items-center justify-center text-white text-[10px]">0.62</div>
+<div class="flex-1 aspect-square bg-[#c2652a] opacity-100 heatmap-cell rounded-sm flex items-center justify-center text-white text-[10px]">1.0</div>
+<div class="flex-1 aspect-square bg-[#c2652a] opacity-[0.5] heatmap-cell rounded-sm flex items-center justify-center text-[#3a302a] text-[10px]">0.45</div>
+<div class="flex-1 aspect-square bg-[#c2652a] opacity-[0.7] heatmap-cell rounded-sm flex items-center justify-center text-white text-[10px]">0.71</div>
+<div class="flex-1 aspect-square bg-[#c2652a] opacity-[0.2] heatmap-cell rounded-sm flex items-center justify-center text-[#3a302a] text-[10px]">0.18</div>
+</div>
+<div class="flex items-center mb-1">
+<div class="w-24 text-xs font-medium text-on-surface-variant">Energy</div>
+<div class="flex-1 aspect-square bg-[#8c3c3c] opacity-[0.2] heatmap-cell rounded-sm flex items-center justify-center text-[#3a302a] text-[10px]">-0.15</div>
+<div class="flex-1 aspect-square bg-[#c2652a] opacity-[0.5] heatmap-cell rounded-sm flex items-center justify-center text-[#3a302a] text-[10px]">0.45</div>
+<div class="flex-1 aspect-square bg-[#c2652a] opacity-100 heatmap-cell rounded-sm flex items-center justify-center text-white text-[10px]">1.0</div>
+<div class="flex-1 aspect-square bg-[#c2652a] opacity-[0.3] heatmap-cell rounded-sm flex items-center justify-center text-[#3a302a] text-[10px]">0.25</div>
+<div class="flex-1 aspect-square bg-[#8c3c3c] opacity-[0.1] heatmap-cell rounded-sm flex items-center justify-center text-[#3a302a] text-[10px]">-0.05</div>
+</div>
+</div>
+</div>
+<!-- Legend -->
+<div class="flex items-center justify-end gap-4 mt-6 text-xs text-on-surface-variant">
+<span>Negative (-1.0)</span>
+<div class="w-32 h-2 rounded-full bg-gradient-to-r from-tertiary via-surface-variant to-primary opacity-80"></div>
+<span>Positive (1.0)</span>
+</div>
+</div>
+<!-- VaR Calculator Column -->
+<div class="flex flex-col gap-8">
+<!-- Value at Risk Card -->
+<div class="bg-surface-container-lowest rounded-xl p-8 shadow-soft border border-outline-variant/30 flex-1">
+<h3 class="font-headline text-2xl text-on-background mb-2">Value at Risk (VaR)</h3>
+<p class="text-sm text-on-surface-variant mb-6">Parametric estimation mapping potential tail loss.</p>
+<!-- Distribution Visualization -->
+<div class="distribution-curve rounded-t-lg mb-4 relative">
+<svg class="curve-path" preserveaspectratio="none" viewbox="0 0 100 100">
+<path d="M0,100 C20,90 30,10 50,10 C70,10 80,90 100,100"></path>
+</svg>
+<!-- VaR Line Marker -->
+<div class="absolute top-0 bottom-0 left-[15%] w-px bg-tertiary border-l border-dashed border-tertiary"></div>
+<div class="absolute bottom-2 left-[5%] text-[10px] text-tertiary font-bold">Tail Risk</div>
+</div>
+<div class="flex justify-between text-xs text-on-surface-variant border-b border-outline-variant/40 pb-4 mb-4">
+<div>
+<p class="mb-1">Confidence Interval</p>
+<div class="flex gap-2">
+<button class="px-2 py-1 bg-surface-container rounded hover:bg-surface-variant transition">95%</button>
+<button class="px-2 py-1 bg-primary-container text-on-primary-container rounded font-medium">99%</button>
+</div>
+</div>
+<div class="text-right">
+<p class="mb-1">Time Horizon</p>
+<span class="font-medium text-on-background">10 Days</span>
+</div>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-sm font-medium">Estimated Loss</span>
+<span class="font-headline text-xl text-tertiary font-semibold">-$1,420,500</span>
+</div>
+</div>
+<!-- Stress Testing Simulator (CLT) mini-view -->
+<div class="bg-surface-container rounded-xl p-6 shadow-soft border border-outline-variant/30 relative group overflow-hidden">
+<!-- Decorative bg -->
+<div class="absolute -right-8 -top-8 w-32 h-32 bg-primary/5 rounded-full blur-2xl"></div>
+<h4 class="font-headline text-lg text-on-background mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="science">science</span>
+                            CLT Stress Simulator
+                        </h4>
+<!-- Mini Bar Chart simulating CLT shifting -->
+<div class="flex items-end h-24 gap-1 mb-4 border-b border-outline-variant/50 pb-1">
+<div class="w-full bg-surface-variant rounded-t-sm h-[20%] clt-bar group-hover:bg-tertiary/20 group-hover:h-[40%]"></div>
+<div class="w-full bg-surface-variant rounded-t-sm h-[40%] clt-bar group-hover:bg-tertiary/40 group-hover:h-[60%]"></div>
+<div class="w-full bg-outline-variant rounded-t-sm h-[80%] clt-bar group-hover:bg-tertiary/60 group-hover:h-[70%]"></div>
+<div class="w-full bg-primary/40 rounded-t-sm h-[100%] clt-bar group-hover:bg-tertiary/80 group-hover:h-[40%]"></div>
+<div class="w-full bg-outline-variant rounded-t-sm h-[80%] clt-bar group-hover:bg-primary/40 group-hover:h-[20%]"></div>
+<div class="w-full bg-surface-variant rounded-t-sm h-[40%] clt-bar group-hover:bg-surface-variant group-hover:h-[10%]"></div>
+<div class="w-full bg-surface-variant rounded-t-sm h-[20%] clt-bar group-hover:bg-surface-variant group-hover:h-[5%]"></div>
+</div>
+<p class="text-xs text-on-surface-variant mb-4">Simulates distribution shift under a '2008 Financial Crisis' scenario.</p>
+<button class="w-full py-2 border border-primary text-primary rounded-lg text-sm font-medium hover:bg-primary/5 transition-colors">Configure Scenario</button>
+</div>
+</div>
+</div>
+</main>
+</div>
+<!-- Footer Component -->
+<footer class="bg-surface-container-lowest dark:bg-surface-dim font-body text-label-small text-on-surface-variant/80 w-full fixed bottom-0 z-40 border-t border-outline-variant/40 flex justify-between items-center px-8 py-3 ml-0 md:ml-64">
+<p>© 2024 FinOptima. Regulatory compliance: Fully aligned with Basel III/IV and IFRS 9 standards.</p>
+<ul class="flex gap-6">
+<li><a class="text-on-surface-variant hover:text-primary transition-opacity duration-200" href="#">Regulatory Disclosure</a></li>
+<li><a class="text-on-surface-variant hover:text-primary transition-opacity duration-200" href="#">Privacy Policy</a></li>
+<li><a class="text-on-surface-variant hover:text-primary transition-opacity duration-200" href="#">Audit Log</a></li>
+</ul>
+</footer>
+<script>
+        // Simple JS to handle active states randomly for demonstration if needed, 
+        // but component instructions dictate static rendering based on 'active' instruction.
+        // SideNavBar 'Portfolio Correlation' is active via CSS classes applied in HTML.
+    </script>
+</body></html>
