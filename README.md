@@ -357,8 +357,9 @@ This project is licensed under the MIT License - see LICENSE file for details.
 
 ## 👤 Author
 
-**Karban Salim**  
+**Karan Bansal**  
 Twitter: [@_karbansal2006](https://twitter.com/_karbansal2006)
+Linkedin:[@karan-bansal-a54648302](https://www.linkedin.com/in/karan-bansal-a54648302/)
 
 ---
 
